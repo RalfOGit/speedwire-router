@@ -1,3 +1,4 @@
+#include <memory.h>
 #include <LocalHost.hpp>
 #include <AddressConversion.hpp>
 #include <Logger.hpp>
