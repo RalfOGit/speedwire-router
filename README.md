@@ -1,5 +1,5 @@
 # speedwire-router
-A C++ executable to route sma speedwire packets between subnets and to individual hosts on residing on different subnets.
+A C++ executable to route sma speedwire packets between subnets and to individual hosts residing on different subnets.
 
 The executable opens sockets on all available host interfaces. Each inbound SMA(TM) speedwire unicast and multicast packet on a given host interface is forwarded to each of the other host interfaces. A bounce detecter is implemented to prevent packets bouncing infinitely between subnets.
 
