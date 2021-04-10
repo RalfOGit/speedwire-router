@@ -23,4 +23,5 @@ The accompanied CMakeLists.txt assumes the following folder structure:
 
 The code has been tested against the following environment:
 
+    OS: CentOS 8(TM), IDE: VSCode (TM)
     OS: Windows 10(TM), IDE: Visual Studio Community Edition 2019 (TM)
