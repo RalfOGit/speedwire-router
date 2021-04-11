@@ -20,7 +20,7 @@ PacketPatcher::PacketPatcher(void) {
  *  Patch the given speedwire packet in-place
  */
 void PacketPatcher::patch(SpeedwireHeader& speedwire_packet, struct sockaddr& src) {
-#if 0
+#if 1
     // example implementation for an emeter packet patch
     uint32_t group      = speedwire_packet.getGroup();
     uint16_t length     = speedwire_packet.getLength();
