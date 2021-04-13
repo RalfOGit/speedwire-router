@@ -66,7 +66,7 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
 /**
  *  Constructor
  */
-InverterPacketReceiver::InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*> sender)
+InverterPacketReceiver::InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& sender)
   : InverterPacketReceiverBase(host),
     senders(sender),
     bounceDetector(),

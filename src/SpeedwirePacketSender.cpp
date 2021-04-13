@@ -100,7 +100,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, struct sockaddr& src) {
             sockaddr.sin_family = AF_INET;
             sockaddr.sin_addr = peer;
             sockaddr.sin_port = htons(9522);
-            logger.print(LogLevel::LOG_INFO_1, "forward emeter packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
+            logger.print(LogLevel::LOG_INFO_1, "forward speedwire packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
             int nbytes = socket.sendto(packet.getPacketPointer(), packet.getPacketSize(), sockaddr);
             if (nbytes != packet.getPacketSize()) {
                 logger.print(LogLevel::LOG_ERROR, "error transmitting unicast packet to %s\n", local_interface_ip.c_str());
@@ -121,7 +121,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, struct sockaddr& src) {
             sockaddr.sin6_family = AF_INET6;
             sockaddr.sin6_addr = peer;
             sockaddr.sin6_port = htons(9522);
-            logger.print(LogLevel::LOG_INFO_1, "forward emeter packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
+            logger.print(LogLevel::LOG_INFO_1, "forward speedwire packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
             int nbytes = socket.sendto(packet.getPacketPointer(), packet.getPacketSize(), sockaddr);
             if (nbytes != packet.getPacketSize()) {
                 logger.print(LogLevel::LOG_ERROR, "error transmitting unicast packet to %s\n", local_interface_ip.c_str());

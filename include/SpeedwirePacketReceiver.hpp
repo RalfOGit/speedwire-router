@@ -25,7 +25,7 @@ protected:
     PacketPatcher  packetPatcher;
 
 public:
-    EmeterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*> &senders);
+    EmeterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
     virtual void receive(SpeedwireHeader& packet, struct sockaddr& src);
 };
 
@@ -40,7 +40,7 @@ protected:
     PacketPatcher  packetPatcher;
 
 public:
-    InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*> senders);
+    InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
     virtual void receive(SpeedwireHeader& packet, struct sockaddr& src);
 };
 
