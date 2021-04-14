@@ -27,13 +27,13 @@ protected:
     std::array<Fingerprint, 8> history;
     int replace_index;
 
-    bool insertFingerprint(Fingerprint& fingerprint, SpeedwireEmeterProtocol&   packet, struct sockaddr& src);
-    bool insertFingerprint(Fingerprint& fingerprint, SpeedwireInverterProtocol& packet, struct sockaddr& src);
+    bool setFingerprint(Fingerprint& fingerprint, const SpeedwireEmeterProtocol&   packet, const struct sockaddr& src) const;
+    bool setFingerprint(Fingerprint& fingerprint, const SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
 
 public:
     BounceDetector(void);
-    template<class T> void receive(T& packet, struct sockaddr& src);
-    template<class T> bool isBouncedPacket(T& packet, struct sockaddr& src);
+    template<class T> void receive(const T& packet, const struct sockaddr& src);
+    template<class T> bool isBouncedPacket(const T& packet, const struct sockaddr& src) const;
 };
 
 #endif

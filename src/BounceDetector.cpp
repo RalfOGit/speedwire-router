@@ -24,9 +24,9 @@ BounceDetector::BounceDetector(void) {
 /**
  *  Received packets are added to the history table, while replacing the oldest entry
  */
-template<class T> void BounceDetector::receive(T& speedwire_packet, struct sockaddr& src) {
+template<class T> void BounceDetector::receive(const T& speedwire_packet, const struct sockaddr& src) {
     // insert the fingerprint of the given speedwire packet at the replace_index position in the history
-    if (insertFingerprint(history[replace_index], speedwire_packet, src) == true) {
+    if (setFingerprint(history[replace_index], speedwire_packet, src) == true) {
         if (++replace_index >= history.size()) {
             replace_index = 0;
         }
@@ -36,9 +36,9 @@ template<class T> void BounceDetector::receive(T& speedwire_packet, struct socka
 /**
  *  Check if the given packets fingerprint can be found in the history table
  */
-template<class T> bool BounceDetector::isBouncedPacket(T& speedwire_packet, struct sockaddr& src) {
+template<class T> bool BounceDetector::isBouncedPacket(const T& speedwire_packet, const struct sockaddr& src) const {
     Fingerprint packet;
-    if (insertFingerprint(packet, speedwire_packet, src) == true) {
+    if (setFingerprint(packet, speedwire_packet, src) == true) {
         for (const auto& entry : history) {
             if (entry.src_susyid == packet.src_susyid && entry.src_serial == packet.src_serial && 
                 entry.timer      == packet.timer      && entry.packet_id  == packet.packet_id) {
@@ -53,7 +53,7 @@ template<class T> bool BounceDetector::isBouncedPacket(T& speedwire_packet, stru
  *  Insert emeter fingerprint at the given history tableposition
  *  The fingerprint is derived from the source susyid, serial and timer values
  */
-bool BounceDetector::insertFingerprint(Fingerprint& fingerprint, SpeedwireEmeterProtocol& emeter_packet, struct sockaddr& src) {
+bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireEmeterProtocol& emeter_packet, const struct sockaddr& src) const {
     // the fingerprint for emeter packets is defined by susyid, serialnumber and creation time
     fingerprint.src_susyid = emeter_packet.getSusyID();
     fingerprint.src_serial = emeter_packet.getSerialNumber();
@@ -66,7 +66,7 @@ bool BounceDetector::insertFingerprint(Fingerprint& fingerprint, SpeedwireEmeter
  *  Insert inverter fingerprint at the given history table position
  *  The fingerprint is derived from the source susyid, serial and packetid values
  */
-bool BounceDetector::insertFingerprint(Fingerprint& fingerprint, SpeedwireInverterProtocol& inverter_packet, struct sockaddr& src) {
+bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireInverterProtocol& inverter_packet, const struct sockaddr& src) const {
     fingerprint.src_susyid = inverter_packet.getSrcSusyID();
     fingerprint.src_serial = inverter_packet.getSrcSerialNumber();
     fingerprint.timer      = 0;
@@ -75,7 +75,7 @@ bool BounceDetector::insertFingerprint(Fingerprint& fingerprint, SpeedwireInvert
 }
 
 // explicit template instantiations
-template void BounceDetector::receive(SpeedwireEmeterProtocol& packet, struct sockaddr& src);
-template void BounceDetector::receive(SpeedwireInverterProtocol& packet, struct sockaddr& src);
-template bool BounceDetector::isBouncedPacket(SpeedwireEmeterProtocol& packet, struct sockaddr& src);
-template bool BounceDetector::isBouncedPacket(SpeedwireInverterProtocol& packet, struct sockaddr& src);
+template void BounceDetector::receive(const SpeedwireEmeterProtocol& packet, const struct sockaddr& src);
+template void BounceDetector::receive(const SpeedwireInverterProtocol& packet, const struct sockaddr& src);
+template bool BounceDetector::isBouncedPacket(const SpeedwireEmeterProtocol& packet, const struct sockaddr& src) const;
+template bool BounceDetector::isBouncedPacket(const SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
