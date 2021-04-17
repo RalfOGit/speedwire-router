@@ -3,7 +3,9 @@ A C++ executable to route sma speedwire packets between subnets and to individua
 
 The executable opens sockets on all available host interfaces. Each inbound SMA(TM) speedwire unicast and multicast packet on a given host interface is forwarded to each of the other host interfaces. A bounce detecter is implemented to prevent packets bouncing infinitely between subnets.
 
-Ideally this executable is executed on a host connecting the two or more subnets you would like to route speedwire packets between. But you can also configure individual hosts residing on different subnets. In the latter case inbound unicast and multicast packets on any of the available host interfaces are forwarded as unicast packets to the configured individual hosts.
+Ideally this executable is executed on a host connecting the two or more subnets you would like to route speedwire packets between. But you can also configure individual hosts residing on different subnets (by adding e.g. discoverer.preRegisterDevice("192.168.182.18") to main.cpp). In the latter case inbound unicast and multicast packets on any of the available host interfaces are forwarded as unicast packets to the configured individual hosts.
+
+As an additional benefit you can modify or patch the packet contents before routing them.
 
 The software comes as is. No warrantees whatsoever are given and no responsibility is assumed in case of failure. There is neither a GUI nor a configuration file. Configurations must be tweaked by modifying main.cpp.
 
