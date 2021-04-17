@@ -3,9 +3,11 @@ A C++ executable to route sma speedwire packets between subnets and to individua
 
 The executable opens sockets on all available host interfaces. Each inbound SMA(TM) speedwire unicast and multicast packet on a given host interface is forwarded to each of the other host interfaces. A bounce detecter is implemented to prevent packets bouncing infinitely between subnets.
 
-Ideally this executable is executed on a host connecting the two or more subnets you would like to route speedwire packets between. But you can also configure individual hosts residing on different subnets (by adding e.g. discoverer.preRegisterDevice("192.168.182.18") to main.cpp). In the latter case inbound unicast and multicast packets on any of the available host interfaces are forwarded as unicast packets to the configured individual hosts.
+This is interesting for different use cases
+1. You have speedwire devices residing in two different subnets. A lot of speedwire communication is handled through multicast udp packets. Multicast packets will not pass subnet boundaries. Executing the speedwire-router executable on a host that is connected to both subnets will solve this problem.
+2. You have individual speedwire devices residing in a different subnet or somewhere on the internet. This can be solved by executing the speedwire-router executable in your local subnet (where the multicast traffic is originating from) and pre-registering the IP address(es) of the individual devices by calling discoverer.preRegisterDevice("YOUR.IP.ADDRESS.HERE") in main.cpp. Inbound unicast and multicast packets on any of the available host interfaces are forwarded as unicast packets to the configured individual devices.
 
-As an additional benefit you can modify or patch the packet contents before routing them.
+As an additional benefit you can modify or patch the packet contents before routing them. 
 
 The software comes as is. No warrantees whatsoever are given and no responsibility is assumed in case of failure. There is neither a GUI nor a configuration file. Configurations must be tweaked by modifying main.cpp.
 
