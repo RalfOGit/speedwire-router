@@ -5,7 +5,7 @@ The executable opens sockets on all available host interfaces. Each inbound SMA(
 
 This is interesting for different use cases
 1. You have speedwire devices residing in two different subnets. A lot of speedwire communication is handled through multicast udp packets. Multicast packets will not pass subnet boundaries. Executing the speedwire-router executable on a host that is connected to both subnets will solve this problem. You can also extend this scheme to three or more subnets; just make sure the bounce detector has enough space for packet history.
-2. You have individual speedwire devices residing in a different subnet or somewhere on the internet. This can be solved by running the speedwire-router executable in your local subnet (where the multicast traffic is originating from) and pre-registering the IP address(es) of the individual devices by calling discoverer.preRegisterDevice("YOUR.IP.ADDRESS.HERE") in main.cpp. Inbound unicast and multicast packets on any of the available host interfaces are forwarded as unicast packets to the configured individual devices.
+2. You have individual speedwire devices residing in a different subnet or somewhere on the internet. This can be solved by running the speedwire-router executable in your local subnet (where the multicast traffic is originating from) and pre-registering the IP address(es) of the individual devices by calling discoverer.preRegisterDevice("YOUR.IP.ADDRESS.HERE") in main.cpp. Inbound unicast and multicast packets on any of the available host interfaces will be forwarded as unicast packets to the configured individual devices.
 
 As an additional benefit you can modify or patch the packet contents before routing them. 
 
