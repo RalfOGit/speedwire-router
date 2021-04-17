@@ -12,7 +12,7 @@
 PacketPatcher::PacketPatcher(void) {
     // define an obis data element with the given negative active power total value and convert it to its byte representation
     ObisData temp = ObisData::NegativeActivePowerTotal;
-    temp.measurementValue->value = 3480;
+    temp.measurementValue.value = 3480;
     maxNegativeActivePowerTotalBytes = temp.toByteArray();
 }
 
