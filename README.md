@@ -25,6 +25,8 @@ The accompanied CMakeLists.txt assumes the following folder structure:
         ... build path ...
         CMakeLists.txt
 
+Please see the description in https://github.com/RalfOGit/libspeedwire on how to setup this folder structure.
+
 The code has been tested against the following environment:
 
     OS: CentOS 8(TM), IDE: VSCode (TM)
