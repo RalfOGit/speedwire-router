@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
 
     // configure speedwire packet receive dispatcher
     SpeedwireReceiveDispatcher dispatcher(localhost);
-    dispatcher.registerReceiver(&emeter_packet_receiver);   // as virtual functions are used, we need to work with pointers here
-    dispatcher.registerReceiver(&inverter_packet_receiver);
+    dispatcher.registerReceiver(emeter_packet_receiver);
+    dispatcher.registerReceiver(inverter_packet_receiver);
 
     //
     // main loop
