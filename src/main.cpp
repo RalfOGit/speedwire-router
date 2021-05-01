@@ -41,13 +41,13 @@ int main(int argc, char **argv) {
 
     // open socket(s) to receive sma emeter packets from any local interface
     SpeedwireSocketFactory *socket_factory = SpeedwireSocketFactory::getInstance(localhost);
-    const std::vector<SpeedwireSocket> recv_sockets = socket_factory->getRecvSockets(SpeedwireSocketFactory::ANYCAST, localhost.getLocalIPv4Addresses());
+    const std::vector<SpeedwireSocket> recv_sockets = socket_factory->getRecvSockets(SpeedwireSocketFactory::SocketType::ANYCAST, localhost.getLocalIPv4Addresses());
 
     // configure speedwire packet sender for multicast to each local interface
     std::vector<SpeedwirePacketSender*> packet_senders;
     std::vector<std::string> ipv4_addresses = localhost.getLocalIPv4Addresses();
     for (auto& addr : ipv4_addresses) {
-        SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::MULTICAST, addr);
+        SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::SocketType::MULTICAST, addr);
         packet_senders.push_back(new MulticastPacketSender(localhost, addr, AddressConversion::toString(send_socket.getSpeedwireMulticastIn4Address())));
     }
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
             }
         }
         if (is_reachable_by_multicast == false) {
-            SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::UNICAST, peer_ip);
+            SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, peer_ip);
             packet_senders.push_back(new UnicastPacketSender(localhost, device.interface_ip_address, peer_ip));
         }
     }

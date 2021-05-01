@@ -62,8 +62,8 @@ void MulticastPacketSender::send(SpeedwireHeader& packet, struct sockaddr& src) 
 
     // forward the packet as a multicast packet
     if (forward == true) {
-        //SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::MULTICAST, local_interface_ip);
-        SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::UNICAST, local_interface_ip);
+        //SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::SocketType::MULTICAST, local_interface_ip);
+        SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, local_interface_ip);
         //char loop = 0;
         //int result1 = setsockopt(socket.getSocketFd(), IPPROTO_IP, IP_MULTICAST_LOOP, &loop, sizeof(loop));
         logger.print(LogLevel::LOG_INFO_1, "forward emeter packet to speedwire multicast address (via interface %s)\n", socket.getLocalInterfaceAddress().c_str());
@@ -95,7 +95,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, struct sockaddr& src) {
 
         if (AddressConversion::resideOnSameSubnet(src_in.sin_addr, peer, local_interface_prefix_length) == false) {
             // forward the packet as a unicast packet to the given unicast peer ip address
-            SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::UNICAST, local_interface_ip);
+            SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, local_interface_ip);
             sockaddr_in sockaddr;
             sockaddr.sin_family = AF_INET;
             sockaddr.sin_addr = peer;
@@ -116,7 +116,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, struct sockaddr& src) {
 
         if (AddressConversion::resideOnSameSubnet(src_in.sin6_addr, peer, local_interface_prefix_length) == false) {
             // forward the packet as a unicast packet to the given unicast peer ip address
-            SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::UNICAST, local_interface_ip);
+            SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(local_host)->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, local_interface_ip);
             sockaddr_in6 sockaddr;
             sockaddr.sin6_family = AF_INET6;
             sockaddr.sin6_addr = peer;
