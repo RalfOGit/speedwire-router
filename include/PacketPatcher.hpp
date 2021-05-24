@@ -20,7 +20,7 @@ protected:
 
 public:
     PacketPatcher(void);
-    virtual void patch(SpeedwireHeader& packet, struct sockaddr& src);
+    virtual void patch(libspeedwire::SpeedwireHeader& packet, struct sockaddr& src);
 };
 
 #endif

@@ -1,9 +1,10 @@
-#include <LocalHost.hpp>
 #include <AddressConversion.hpp>
+#include <LocalHost.hpp>
 #include <SpeedwireReceiveDispatcher.hpp>
 #include <SpeedwirePacketReceiver.hpp>
 #include <ObisData.hpp>
 #include <Logger.hpp>
+using namespace libspeedwire;
 
 static Logger logger = Logger("EmeterPacketReceiver");
 

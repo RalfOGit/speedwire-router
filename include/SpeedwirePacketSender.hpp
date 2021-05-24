@@ -12,7 +12,7 @@
  */
 class SpeedwirePacketSender {
 protected:
-    const LocalHost& local_host;
+    const libspeedwire::LocalHost& local_host;
     std::string peer_ip;
     std::string local_interface_ip;
     bool is_ipv4;
@@ -22,8 +22,8 @@ protected:
     uint32_t local_interface_prefix_length;
 
 public:
-    SpeedwirePacketSender(const LocalHost& localhost, const std::string& local_interface_ip, const std::string& peer_ip);
-    virtual void send(SpeedwireHeader& packet, struct sockaddr& src) {};
+    SpeedwirePacketSender(const libspeedwire::LocalHost& localhost, const std::string& local_interface_ip, const std::string& peer_ip);
+    virtual void send(libspeedwire::SpeedwireHeader& packet, const struct sockaddr& src) {};
 };
 
 
@@ -32,8 +32,8 @@ public:
  */
 class MulticastPacketSender : public SpeedwirePacketSender {
 public:
-    MulticastPacketSender(const LocalHost& local_host, const std::string& local_interface, const std::string& peer_ip);
-    virtual void send(SpeedwireHeader& packet, struct sockaddr& src);
+    MulticastPacketSender(const libspeedwire::LocalHost& local_host, const std::string& local_interface, const std::string& peer_ip);
+    virtual void send(libspeedwire::SpeedwireHeader& packet, const struct sockaddr& src);
 };
 
 
@@ -42,8 +42,8 @@ public:
  */
 class UnicastPacketSender : public SpeedwirePacketSender {
 public:
-    UnicastPacketSender(const LocalHost& local_host, const std::string& local_interface, const std::string& peer_ip);
-    virtual void send(SpeedwireHeader& packet, struct sockaddr& src);
+    UnicastPacketSender(const libspeedwire::LocalHost& local_host, const std::string& local_interface, const std::string& peer_ip);
+    virtual void send(libspeedwire::SpeedwireHeader& packet, const struct sockaddr& src);
 };
 
 #endif

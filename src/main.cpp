@@ -7,6 +7,7 @@
 #include <SpeedwirePacketSender.hpp>
 #include <SpeedwireSocketFactory.hpp>
 #include <SpeedwireSocket.hpp>
+using namespace libspeedwire;
 
 static Logger logger("main");
 

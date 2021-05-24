@@ -18,30 +18,30 @@
 /**
  *  Speedwire packet receiver class for sma emeter packets
  */
-class EmeterPacketReceiver : public EmeterPacketReceiverBase {
+class EmeterPacketReceiver : public libspeedwire::EmeterPacketReceiverBase {
 protected:
     std::vector<SpeedwirePacketSender*>& senders;
     BounceDetector bounceDetector;
     PacketPatcher  packetPatcher;
 
 public:
-    EmeterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
-    virtual void receive(SpeedwireHeader& packet, struct sockaddr& src);
+    EmeterPacketReceiver(libspeedwire::LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
+    virtual void receive(libspeedwire::SpeedwireHeader& packet, struct sockaddr& src);
 };
 
 
 /**
  *  Speedwire packet receiver class for sma inverter packets
  */
-class InverterPacketReceiver : public InverterPacketReceiverBase {
+class InverterPacketReceiver : public libspeedwire::InverterPacketReceiverBase {
 protected:
     std::vector<SpeedwirePacketSender*>& senders;
     BounceDetector bounceDetector;
     PacketPatcher  packetPatcher;
 
 public:
-    InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
-    virtual void receive(SpeedwireHeader& packet, struct sockaddr& src);
+    InverterPacketReceiver(libspeedwire::LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
+    virtual void receive(libspeedwire::SpeedwireHeader& packet, struct sockaddr& src);
 };
 
 #endif

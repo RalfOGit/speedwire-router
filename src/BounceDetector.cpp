@@ -1,4 +1,5 @@
 #include <BounceDetector.hpp>
+using namespace libspeedwire;
 
 /**
  *  Speedwire packet bounce detector

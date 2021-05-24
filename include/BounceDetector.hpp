@@ -27,8 +27,8 @@ protected:
     std::array<Fingerprint, 8> history;
     int replace_index;
 
-    bool setFingerprint(Fingerprint& fingerprint, const SpeedwireEmeterProtocol&   packet, const struct sockaddr& src) const;
-    bool setFingerprint(Fingerprint& fingerprint, const SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
+    bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireEmeterProtocol&   packet, const struct sockaddr& src) const;
+    bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
 
 public:
     BounceDetector(void);
