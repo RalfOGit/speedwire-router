@@ -34,7 +34,8 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
     int      offset     = speedwire_packet.getPayloadOffset();
 
     // check if it is an emeter packet
-    if (speedwire_packet.isEmeterProtocolID() == true) {
+    if (speedwire_packet.isEmeterProtocolID()         == true ||
+        speedwire_packet.isExtendedEmeterProtocolID() == true) {
         SpeedwireEmeterProtocol emeter_packet(speedwire_packet);
         uint16_t susyid = emeter_packet.getSusyID();
         uint32_t serial = emeter_packet.getSerialNumber();
