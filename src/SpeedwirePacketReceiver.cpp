@@ -39,7 +39,7 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
         SpeedwireEmeterProtocol emeter_packet(speedwire_packet);
         uint16_t susyid = emeter_packet.getSusyID();
         uint32_t serial = emeter_packet.getSerialNumber();
-        uint32_t timer  = emeter_packet.getTime();
+        uint32_t timer = emeter_packet.getTime();
 
         // perform some simple multicast bounce back prevention
         if (bounceDetector.isBouncedPacket(emeter_packet, src) == true) {

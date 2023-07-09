@@ -34,11 +34,17 @@ int main(int argc, char **argv) {
     Logger::setLogListener(log_listener, log_level);
 
     // discover sma devices on the local network
-    LocalHost &localhost = LocalHost::getInstance();
+    
+    LocalHost& localhost = LocalHost::getInstance();
+    logger.print(LogLevel::LOG_INFO_0, "starting device discovery ...\n");
     SpeedwireDiscovery discoverer(localhost);
     discoverer.preRegisterDevice("192.168.182.18");
-    discoverer.discoverDevices();
-    std::vector<SpeedwireInfo> devices = discoverer.getDevices();
+    int num_devices = discoverer.discoverDevices();
+    logger.print(LogLevel::LOG_INFO_0, "... finished device discovery\n");
+    if (num_devices == 0) {
+        logger.print(LogLevel::LOG_WARNING, "... no speedwire device found\n");
+    }
+    std::vector<SpeedwireDevice> devices = discoverer.getDevices();
 
     // open socket(s) to receive sma emeter packets from any local interface
     SpeedwireSocketFactory *socket_factory = SpeedwireSocketFactory::getInstance(localhost);
