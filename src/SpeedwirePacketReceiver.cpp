@@ -32,17 +32,17 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
     // check if it is a valid data2 packet
     if (speedwire_packet.isValidData2Packet()) {
         const SpeedwireData2Packet data2_packet(speedwire_packet);
-        uint16_t length = data2_packet.getTagLength();
+        uint16_t length     = data2_packet.getTagLength();
         uint16_t protocolID = data2_packet.getProtocolID();
-        int      offset = data2_packet.getPayloadOffset();
+        int      offset     = data2_packet.getPayloadOffset();
 
         // check if it is an emeter packet
-        if (data2_packet.isEmeterProtocolID() == true) {
+        if (SpeedwireData2Packet::isEmeterProtocolID(protocolID) == true || SpeedwireData2Packet::isExtendedEmeterProtocolID(protocolID)) {
             const SpeedwireEmeterProtocol emeter_packet(data2_packet);
 
             uint16_t susyid = emeter_packet.getSusyID();
             uint32_t serial = emeter_packet.getSerialNumber();
-            uint32_t timer = emeter_packet.getTime();
+            uint32_t timer  = emeter_packet.getTime();
 
             // perform some simple multicast bounce back prevention
             if (bounceDetector.isBouncedPacket(emeter_packet, src) == true) {
@@ -94,11 +94,11 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
 
         // check if it is an inverter packet
         if (data2_packet.isInverterProtocolID() == true) {
-            const SpeedwireInverterProtocol inverter_packet(speedwire_packet);
+            const SpeedwireInverterProtocol inverter_packet(data2_packet);
 
             uint16_t susyid = inverter_packet.getSrcSusyID();
             uint32_t serial = inverter_packet.getSrcSerialNumber();
-            uint32_t timer = (uint32_t)LocalHost::getUnixEpochTimeInMs();
+            uint32_t timer  = (uint32_t)LocalHost::getUnixEpochTimeInMs();
 
             // perform some simple multicast bounce back prevention
             if (bounceDetector.isBouncedPacket(inverter_packet, src) == true) {

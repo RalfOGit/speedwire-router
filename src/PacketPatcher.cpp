@@ -32,7 +32,7 @@ void PacketPatcher::patch(SpeedwireHeader& speedwire_packet, struct sockaddr& sr
         int      offset     = data2_packet.getPayloadOffset();
 
         // check if it is an emeter packet
-        if (data2_packet.isEmeterProtocolID() == true) {
+        if (SpeedwireData2Packet::isEmeterProtocolID(protocolID) == true || SpeedwireData2Packet::isExtendedEmeterProtocolID(protocolID)) {
             SpeedwireEmeterProtocol emeter_packet(data2_packet);
 
             uint16_t susyid = emeter_packet.getSusyID();
