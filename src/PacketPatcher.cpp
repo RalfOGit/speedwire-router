@@ -40,7 +40,7 @@ void PacketPatcher::patch(SpeedwireHeader& speedwire_packet, struct sockaddr& sr
             uint32_t timer  = emeter_packet.getTime();
 
             // loop across all obis data in the emeter packet
-            void* obis = emeter_packet.getFirstObisElement();
+            const void* obis = emeter_packet.getFirstObisElement();
             while (obis != NULL) {
                 //emeter_packet.printObisElement(obis, stderr);
                 const uint8_t  channel = emeter_packet.getObisChannel(obis);
@@ -55,7 +55,7 @@ void PacketPatcher::patch(SpeedwireHeader& speedwire_packet, struct sockaddr& sr
                     uint32_t max_value = emeter_packet.getObisValue4(maxNegativeActivePowerTotalBytes.data());
                     if (value > max_value) {
                         fprintf(stdout, "limited max negative active power from %ul to %ul\n", value, max_value);
-                        emeter_packet.setObisElement(obis, maxNegativeActivePowerTotalBytes.data());
+                        emeter_packet.setObisElement((void*)obis, maxNegativeActivePowerTotalBytes.data());
                     }
                 }
 
