@@ -10,6 +10,7 @@
 #include <netinet/in.h>
 #include <net/if.h>
 #endif
+#include <cstring>
 #include <array>
 #include <SpeedwireHeader.hpp>
 #include <SpeedwireEmeterProtocol.hpp>
