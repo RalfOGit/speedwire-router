@@ -157,9 +157,11 @@ void DiscoveryPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct 
         bounceDetector.receive(speedwire_packet, src);
         logger.print(LogLevel::LOG_INFO_1, "received discovery %s packet from %s time %lu\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), timer);
 
-        // forward the discovery packet to all registered producers
-        for (auto& sender : senders) {
-            sender->send(speedwire_packet, src);
+        // forward the discovery request packet to all registered producers
+        if (is_discovery_request) {
+            for (auto& sender : senders) {
+                sender->send(speedwire_packet, src);
+            }
         }
 
         // for discovery responses, try to find the requester
