@@ -44,4 +44,20 @@ public:
     virtual void receive(libspeedwire::SpeedwireHeader& packet, struct sockaddr& src);
 };
 
+
+/**
+ *  Speedwire packet receiver class for sma discovery packets
+ */
+class DiscoveryPacketReceiver : public libspeedwire::DiscoveryPacketReceiverBase {
+protected:
+    libspeedwire::LocalHost &localHost;
+    std::vector<SpeedwirePacketSender*>& senders;
+    BounceDetector bounceDetector;
+    PacketPatcher  packetPatcher;
+
+public:
+    DiscoveryPacketReceiver(libspeedwire::LocalHost& host, std::vector<SpeedwirePacketSender*>& senders);
+    virtual void receive(libspeedwire::SpeedwireHeader& packet, struct sockaddr& src);
+};
+
 #endif

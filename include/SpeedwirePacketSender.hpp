@@ -1,6 +1,15 @@
 #ifndef __SPEEDWIREPACKETSENDER_HPP__
 #define __SPEEDWIREPACKETSENDER_HPP__
 
+#ifdef _WIN32
+#include <Winsock2.h>
+#include <ws2ipdef.h>
+#include <inaddr.h>
+#include <in6addr.h>
+#else
+#include <netinet/in.h>
+#include <net/if.h>
+#endif
 #include <LocalHost.hpp>
 #include <SpeedwireHeader.hpp>
 #include <SpeedwireEmeterProtocol.hpp>

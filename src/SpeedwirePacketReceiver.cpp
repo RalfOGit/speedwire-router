@@ -1,7 +1,9 @@
 #include <AddressConversion.hpp>
 #include <LocalHost.hpp>
+#include <SpeedwireDiscoveryProtocol.hpp>
 #include <SpeedwireReceiveDispatcher.hpp>
 #include <SpeedwirePacketReceiver.hpp>
+#include <SpeedwireSocketFactory.hpp>
 #include <ObisData.hpp>
 #include <Logger.hpp>
 using namespace libspeedwire;
@@ -46,7 +48,7 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
 
             // perform some simple multicast bounce back prevention
             if (bounceDetector.isBouncedPacket(emeter_packet, src) == true) {
-                logger.print(LogLevel::LOG_INFO_1, "received bounced emeter packet from %s susyid %u serial %lu time %lu\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
+                logger.print(LogLevel::LOG_INFO_1, "received bounced emeter packet from %s susyid %u serial %lu time %lu => DROPPED\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
                 return;
             }
             bounceDetector.receive(emeter_packet, src);
@@ -106,7 +108,7 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
                 return;
             }
             bounceDetector.receive(inverter_packet, src);
-            logger.print(LogLevel::LOG_INFO_1, "received inverter packet from %s susyid %u serial %lu time %lu => DROPPED\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
+            logger.print(LogLevel::LOG_INFO_1, "received inverter packet from %s susyid %u serial %lu time %lu\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
 
             // patch packet if required
             packetPatcher.patch(speedwire_packet, src);
@@ -114,6 +116,77 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
             // forward the emeter packet to all registered producers
             for (auto& sender : senders) {
                 sender->send(speedwire_packet, src);
+            }
+        }
+    }
+}
+
+
+/**
+ *  Constructor
+ */
+DiscoveryPacketReceiver::DiscoveryPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& sender)
+    : DiscoveryPacketReceiverBase(host),
+    localHost(host),
+    senders(sender),
+    bounceDetector(),
+    packetPatcher() {
+    protocolID = 0x0000;
+}
+
+/**
+ *  Receive method - can be called with arbitrary speedwire packets
+ */
+void DiscoveryPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct sockaddr& src) {
+
+    // check if it is a valid discovery packet
+    if (speedwire_packet.isValidDiscoveryPacket()) {
+
+        // check if it is a discovery request or a discovery response
+        SpeedwireDiscoveryProtocol discovery_packet(speedwire_packet);
+        bool is_discovery_request  = discovery_packet.isMulticastRequestPacket();
+        bool is_discovery_response = discovery_packet.isMulticastResponsePacket();
+        std::string reqresp = (is_discovery_request ? "request" : (is_discovery_response ? "response" : ""));
+
+        // perform some simple multicast bounce back prevention
+        uint32_t timer = (uint32_t)LocalHost::getUnixEpochTimeInMs();
+        if (bounceDetector.isBouncedPacket(speedwire_packet, src) == true) {
+            logger.print(LogLevel::LOG_INFO_1, "received bounced discovery %s packet from %s time %lu => DROPPED\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), timer);
+            return;
+        }
+        bounceDetector.receive(speedwire_packet, src);
+        logger.print(LogLevel::LOG_INFO_1, "received discovery %s packet from %s time %lu\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), timer);
+
+        // forward the discovery packet to all registered producers
+        for (auto& sender : senders) {
+            sender->send(speedwire_packet, src);
+        }
+
+        // for discovery responses, try to find the requester
+        if (is_discovery_response) {
+            const BounceDetector::History& history = bounceDetector.getHistory();
+            for (const auto& entry : history) {
+                if (entry.packet_type == BounceDetector::PacketType::DISCOVERY_REQUEST &&
+                    SpeedwireTime::calculateAbsTimeDifference(entry.create_time, (uint32_t)LocalHost::getUnixEpochTimeInMs()) <= 1000) {
+                    struct in_addr entry_addr = AddressConversion::toSockAddrIn(entry.src_ip).sin_addr;
+
+                    // try to find the local interface to reach the requester
+                    const std::vector<std::string> &if_addresses = localHost.getLocalIPv4Addresses();
+                    for (const auto& local_interface_ip : if_addresses) {
+                        uint32_t prefix = localHost.getInterfacePrefixLength(local_interface_ip);
+                        if (AddressConversion::resideOnSameSubnet(entry_addr, AddressConversion::toInAddress(local_interface_ip), prefix)) {
+
+                            // forward the discovery response as a unicast packet to the given unicast peer ip address
+                            SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(localHost)->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, local_interface_ip);
+                            logger.print(LogLevel::LOG_INFO_1, "forward discovery response packet to unicast host %s (via interface %s)\n",
+                                AddressConversion::toString(entry.src_ip).c_str(), socket.getLocalInterfaceAddress().c_str());
+                            int nbytes = socket.sendto(speedwire_packet.getPacketPointer(), speedwire_packet.getPacketSize(), entry.src_ip);
+                            if (nbytes != speedwire_packet.getPacketSize()) {
+                                logger.print(LogLevel::LOG_ERROR, "error transmitting unicast packet to %s\n", local_interface_ip.c_str());
+                            }
+                        }
+                    }
+                }
             }
         }
     }

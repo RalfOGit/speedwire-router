@@ -77,11 +77,13 @@ int main(int argc, char **argv) {
     // configure speedwire packet consumers
     EmeterPacketReceiver   emeter_packet_receiver(localhost, packet_senders);
     InverterPacketReceiver inverter_packet_receiver(localhost, packet_senders);
+    DiscoveryPacketReceiver discovery_packet_receiver(localhost, packet_senders);
 
     // configure speedwire packet receive dispatcher
     SpeedwireReceiveDispatcher dispatcher(localhost);
     dispatcher.registerReceiver(emeter_packet_receiver);
     dispatcher.registerReceiver(inverter_packet_receiver);
+    dispatcher.registerReceiver(discovery_packet_receiver);
 
     //
     // main loop
