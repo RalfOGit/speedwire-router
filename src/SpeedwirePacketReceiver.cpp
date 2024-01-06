@@ -76,6 +76,7 @@ void EmeterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct soc
  */
 InverterPacketReceiver::InverterPacketReceiver(LocalHost& host, std::vector<SpeedwirePacketSender*>& sender)
   : InverterPacketReceiverBase(host),
+    localHost(host),
     senders(sender),
     bounceDetector(),
     packetPatcher() {
@@ -95,7 +96,8 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
         int      offset = data2_packet.getPayloadOffset();
 
         // check if it is an inverter packet
-        if (data2_packet.isInverterProtocolID() == true) {
+        if (data2_packet.isInverterProtocolID() == true ||
+            data2_packet.getProtocolID() == 0x6075) {
             const SpeedwireInverterProtocol inverter_packet(data2_packet);
 
             uint16_t susyid = inverter_packet.getSrcSusyID();
@@ -108,8 +110,31 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
                 return;
             }
             bounceDetector.receive(inverter_packet, src);
-            logger.print(LogLevel::LOG_INFO_1, "received inverter packet from %s susyid %u serial %lu time %lu\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
+            std::string reqresp = ((inverter_packet.getCommandID() & 0xff) == 0x00 ? "request" : "response");
+            logger.print(LogLevel::LOG_INFO_1, "received inverter %s packet from %s susyid %u serial %lu time %lu\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), susyid, serial, timer);
+            std::string istr = inverter_packet.toString();
+            logger.print(LogLevel::LOG_INFO_1, "%s\n", istr.c_str());
 
+#if 0
+            // check if it is a broadcast request packet from a node on a different subnet
+            if (inverter_packet.getDstSusyID() == 0xffff && inverter_packet.getDstSerialNumber() == 0xffffffff && (inverter_packet.getCommandID() & 0xff) == 0x00) {
+                struct in_addr src_addr; src_addr.s_addr = AddressConversion::toSockAddrIn(src).sin_addr.s_addr;
+                bool is_sender_on_local_subnet = false;
+                for (const auto& local_ip : localHost.getLocalIPv4Addresses()) {
+                    if (AddressConversion::resideOnSameSubnet(src_addr, AddressConversion::toInAddress(local_ip), localHost.getInterfacePrefixLength(local_ip))) {
+                        is_sender_on_local_subnet = true;
+                    }
+                }
+                if (is_sender_on_local_subnet == false) {
+                    const std::vector<std::string>& localIPs = localHost.getLocalIPv4Addresses();
+                    for (const auto& if_addr : localIPs) {
+                        SpeedwireSocket socket = SpeedwireSocketFactory::getInstance(localHost)->getSendSocket(SpeedwireSocketFactory::SocketType::MULTICAST, if_addr);
+                        fprintf(stdout, "send broadcast request to %s (via interface %s)\n", AddressConversion::toString(socket.getSpeedwireMulticastIn4Address()).c_str(), socket.getLocalInterfaceAddress().c_str());
+                        int nbytes = socket.sendto(speedwire_packet.getPacketPointer(), (unsigned long)speedwire_packet.getPacketSize(), socket.getSpeedwireMulticastIn4Address(), AddressConversion::toInAddress(if_addr));
+                    }
+                }
+            }
+#endif
             // patch packet if required
             packetPatcher.patch(speedwire_packet, src);
 

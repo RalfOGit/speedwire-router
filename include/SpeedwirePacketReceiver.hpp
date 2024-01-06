@@ -35,6 +35,7 @@ public:
  */
 class InverterPacketReceiver : public libspeedwire::InverterPacketReceiverBase {
 protected:
+    libspeedwire::LocalHost& localHost;
     std::vector<SpeedwirePacketSender*>& senders;
     BounceDetector bounceDetector;
     PacketPatcher  packetPatcher;
