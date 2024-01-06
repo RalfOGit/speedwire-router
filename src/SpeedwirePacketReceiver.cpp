@@ -97,7 +97,7 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
 
         // check if it is an inverter packet
         if (data2_packet.isInverterProtocolID() == true ||
-            data2_packet.getProtocolID() == 0x6075) {
+            data2_packet.getProtocolID() == SpeedwireData2Packet::sma_0x6075_protocol_id) {
             const SpeedwireInverterProtocol inverter_packet(data2_packet);
 
             uint16_t susyid = inverter_packet.getSrcSusyID();
