@@ -14,6 +14,7 @@
 #include <array>
 #include <SpeedwireHeader.hpp>
 #include <SpeedwireEmeterProtocol.hpp>
+#include <SpeedwireEncryptionProtocol.hpp>
 #include <SpeedwireInverterProtocol.hpp>
 #include <SpeedwirePacketSender.hpp>
 
@@ -31,7 +32,8 @@ public:
         EMETER = 1,
         INVERTER = 2,
         DISCOVERY_REQUEST = 3,
-        DISCOVERY_RESPONSE = 4
+        DISCOVERY_RESPONSE = 4,
+        ENCRYPTION = 5
     };
 
     class Fingerprint {
@@ -47,6 +49,7 @@ public:
         uint32_t        src_timer;      //!< source timestamp (emeter only)
         uint16_t        src_packet_id;  //!< packet id (inverter only)
         struct in_addr  src_ip_addr;    //!< ip address (discovery response only)
+        uint32_t        src_bytes;      //!< first 4 source bytes (encryption only)
 
         Fingerprint(void) :
             packet_type(PacketType::UNKNOWN), create_time(0), src_susyid(0), src_serial(0), src_timer(0), src_packet_id(0) {
@@ -67,6 +70,7 @@ protected:
 
     bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireEmeterProtocol&   packet, const struct sockaddr& src) const;
     bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
+    bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireEncryptionProtocol& packet, const struct sockaddr& src) const;
     bool setFingerprint(Fingerprint& fingerprint, const libspeedwire::SpeedwireHeader& speedwire_packet, const struct sockaddr& src) const;
 
 public:

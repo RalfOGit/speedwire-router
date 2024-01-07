@@ -1,6 +1,7 @@
 #include <AddressConversion.hpp>
 #include <LocalHost.hpp>
 #include <SpeedwireDiscoveryProtocol.hpp>
+#include <SpeedwireEncryptionProtocol.hpp>
 #include <SpeedwireReceiveDispatcher.hpp>
 #include <SpeedwirePacketReceiver.hpp>
 #include <SpeedwireSocketFactory.hpp>
@@ -96,8 +97,7 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
         int      offset = data2_packet.getPayloadOffset();
 
         // check if it is an inverter packet
-        if (data2_packet.isInverterProtocolID() == true ||
-            data2_packet.getProtocolID() == SpeedwireData2Packet::sma_0x6075_protocol_id) {
+        if (data2_packet.isInverterProtocolID() == true) {
             const SpeedwireInverterProtocol inverter_packet(data2_packet);
 
             uint16_t susyid = inverter_packet.getSrcSusyID();
@@ -135,6 +135,34 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
                 }
             }
 #endif
+            // patch packet if required
+            packetPatcher.patch(speedwire_packet, src);
+
+            // forward the emeter packet to all registered producers
+            for (auto& sender : senders) {
+                sender->send(speedwire_packet, src);
+            }
+        }
+        // check if it is an encryption packet
+        else if (data2_packet.isEncryptionProtocolID() == true) {
+            const SpeedwireEncryptionProtocol encryption_packet(data2_packet);
+
+            uint8_t  type   = encryption_packet.getPacketType();
+            uint16_t susyid = encryption_packet.getSrcSusyID();
+            uint32_t serial = encryption_packet.getSrcSerialNumber();
+            uint32_t timer  = (uint32_t)LocalHost::getUnixEpochTimeInMs();
+
+            // perform some simple multicast bounce back prevention
+            if (bounceDetector.isBouncedPacket(encryption_packet, src) == true) {
+                logger.print(LogLevel::LOG_INFO_1, "received bounced encryption packet from %s susyid %u serial %lu time %lu => DROPPED\n", AddressConversion::toString(src).c_str(), susyid, serial, timer);
+                return;
+            }
+            bounceDetector.receive(encryption_packet, src);
+            std::string reqresp = (type == 0x01 ? "request" : (type == 0x02 ? "response" : "unknown"));
+            logger.print(LogLevel::LOG_INFO_1, "received encryption %s packet from %s susyid %u serial %lu time %lu\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), susyid, serial, timer);
+            std::string istr = encryption_packet.toString();
+            logger.print(LogLevel::LOG_INFO_1, "%s\n", istr.c_str());
+
             // patch packet if required
             packetPatcher.patch(speedwire_packet, src);
 

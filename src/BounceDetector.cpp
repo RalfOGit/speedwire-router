@@ -58,6 +58,11 @@ template<class T> bool BounceDetector::isBouncedPacket(const T& speedwire_packet
                         return true;
                     }
                     break;
+                case PacketType::ENCRYPTION:
+                    if (entry.src_susyid == packet.src_susyid && entry.src_serial == packet.src_serial && entry.src_bytes == packet.src_bytes) {
+                        return true;
+                    }
+                    break;
                 default:
                     break;
                 }
@@ -85,11 +90,24 @@ bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireEme
  *  The fingerprint is derived from the source susyid, serial and packetid values
  */
 bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireInverterProtocol& inverter_packet, const struct sockaddr& src) const {
-    // the fingerprint for emeter packets is defined by susyid, serialnumber and packet id
+    // the fingerprint for inverter packets is defined by susyid, serialnumber and packet id
     fingerprint = Fingerprint(src, PacketType::INVERTER, (uint32_t)LocalHost::getUnixEpochTimeInMs());
     fingerprint.src_susyid    = inverter_packet.getSrcSusyID();
     fingerprint.src_serial    = inverter_packet.getSrcSerialNumber();
     fingerprint.src_packet_id = inverter_packet.getPacketID();
+    return true;
+}
+
+/**
+ *  Insert inverter fingerprint at the given history table position
+ *  The fingerprint is derived from the source susyid, serial and the first 4 payload bytes
+ */
+bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireEncryptionProtocol& inverter_packet, const struct sockaddr& src) const {
+    // the fingerprint for encryption packets is defined by susyid, serialnumber and the first 4 payload bytes
+    fingerprint = Fingerprint(src, PacketType::ENCRYPTION, (uint32_t)LocalHost::getUnixEpochTimeInMs());
+    fingerprint.src_susyid = inverter_packet.getSrcSusyID();
+    fingerprint.src_serial = inverter_packet.getSrcSerialNumber();
+    fingerprint.src_bytes  = inverter_packet.getDataUint32(0);
     return true;
 }
 
@@ -121,7 +139,9 @@ bool BounceDetector::setFingerprint(Fingerprint& fingerprint, const SpeedwireHea
 // explicit template instantiations
 template void BounceDetector::receive(const SpeedwireEmeterProtocol& packet, const struct sockaddr& src);
 template void BounceDetector::receive(const SpeedwireInverterProtocol& packet, const struct sockaddr& src);
+template void BounceDetector::receive(const SpeedwireEncryptionProtocol& packet, const struct sockaddr& src);
 template void BounceDetector::receive(const SpeedwireHeader& packet, const struct sockaddr& src);
 template bool BounceDetector::isBouncedPacket(const SpeedwireEmeterProtocol& packet, const struct sockaddr& src) const;
 template bool BounceDetector::isBouncedPacket(const SpeedwireInverterProtocol& packet, const struct sockaddr& src) const;
+template bool BounceDetector::isBouncedPacket(const SpeedwireEncryptionProtocol& packet, const struct sockaddr& src) const;
 template bool BounceDetector::isBouncedPacket(const SpeedwireHeader& packet, const struct sockaddr& src) const;
