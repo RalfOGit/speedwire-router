@@ -1,5 +1,7 @@
 #include <LocalHost.hpp>
 #include <Logger.hpp>
+#include <SpeedwireAuthentication.hpp>
+#include <SpeedwireCommand.hpp>
 #include <SpeedwireDiscovery.hpp>
 #include <SpeedwireHeader.hpp>
 #include <SpeedwireReceiveDispatcher.hpp>
@@ -51,16 +53,16 @@ int main(int argc, char **argv) {
     const std::vector<SpeedwireSocket> recv_sockets = socket_factory->getRecvSockets(SpeedwireSocketFactory::SocketType::ANYCAST, localhost.getLocalIPv4Addresses());
 
     // configure speedwire packet sender for multicast to each local interface
-    std::vector<SpeedwirePacketSender*> packet_senders;
+    std::vector<SpeedwirePacketSender*> multicast_packet_senders;
     std::vector<std::string> ipv4_addresses = localhost.getLocalIPv4Addresses();
     for (auto& addr : ipv4_addresses) {
         SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::SocketType::MULTICAST, addr);
-        packet_senders.push_back(new MulticastPacketSender(localhost, addr, AddressConversion::toString(send_socket.getSpeedwireMulticastIn4Address())));
+        multicast_packet_senders.push_back(new MulticastPacketSender(localhost, addr, AddressConversion::toString(send_socket.getSpeedwireMulticastIn4Address())));
     }
 
     // configure speedwire packet sender for unicast to single speedwire devices not directly reachable by multicast
     for (auto& device : devices) {
-        const std::string& peer_ip = device.peer_ip_address;
+        const std::string& peer_ip = device.deviceIpAddress;
         bool is_reachable_by_multicast = false;
         for (auto& addr : ipv4_addresses) {
             if (AddressConversion::resideOnSameSubnet(AddressConversion::toInAddress(peer_ip), AddressConversion::toInAddress(addr), localhost.getInterfacePrefixLength(addr)) == true) {
@@ -70,20 +72,26 @@ int main(int argc, char **argv) {
         }
         if (is_reachable_by_multicast == false) {
             SpeedwireSocket& send_socket = socket_factory->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, peer_ip);
-            packet_senders.push_back(new UnicastPacketSender(localhost, device.interface_ip_address, peer_ip));
+            multicast_packet_senders.push_back(new UnicastPacketSender(localhost, device.interfaceIpAddress, peer_ip));
         }
     }
 
     // configure speedwire packet consumers
-    EmeterPacketReceiver   emeter_packet_receiver(localhost, packet_senders);
-    InverterPacketReceiver inverter_packet_receiver(localhost, packet_senders);
-    DiscoveryPacketReceiver discovery_packet_receiver(localhost, packet_senders);
+    EmeterPacketReceiver   emeter_packet_receiver(localhost, multicast_packet_senders);
+    InverterPacketReceiver inverter_packet_receiver(localhost, multicast_packet_senders);
+    DiscoveryPacketReceiver discovery_packet_receiver(localhost, multicast_packet_senders);
 
     // configure speedwire packet receive dispatcher
     SpeedwireReceiveDispatcher dispatcher(localhost);
     dispatcher.registerReceiver(emeter_packet_receiver);
     dispatcher.registerReceiver(inverter_packet_receiver);
     dispatcher.registerReceiver(discovery_packet_receiver);
+
+#if 0
+    SpeedwireAuthentication authenticator(localhost, discoverer.getDevices());
+    authenticator.logoffAnyFromAny();
+    authenticator.loginAnyToAny(true, "9999", 1000);
+#endif
 
     //
     // main loop
