@@ -100,7 +100,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, const struct sockaddr& s
             sockaddr_in sockaddr;
             sockaddr.sin_family = AF_INET;
             sockaddr.sin_addr = peer;
-            sockaddr.sin_port = htons(9522);
+            sockaddr.sin_port = htons(SpeedwireSocket::speedwire_port_9522);
             logger.print(LogLevel::LOG_INFO_1, "forward speedwire packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
             int nbytes = socket.sendto(packet.getPacketPointer(), packet.getPacketSize(), sockaddr);
             if (nbytes != packet.getPacketSize()) {
@@ -121,7 +121,7 @@ void UnicastPacketSender::send(SpeedwireHeader& packet, const struct sockaddr& s
             struct sockaddr_in6 sockaddr;
             sockaddr.sin6_family = AF_INET6;
             sockaddr.sin6_addr = peer;
-            sockaddr.sin6_port = htons(9522);
+            sockaddr.sin6_port = htons(SpeedwireSocket::speedwire_port_9522);
             logger.print(LogLevel::LOG_INFO_1, "forward speedwire packet to unicast host %s (via interface %s)\n", peer_ip.c_str(), socket.getLocalInterfaceAddress().c_str());
             int nbytes = socket.sendto(packet.getPacketPointer(), packet.getPacketSize(), sockaddr);
             if (nbytes != packet.getPacketSize()) {
