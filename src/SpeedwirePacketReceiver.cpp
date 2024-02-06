@@ -110,7 +110,7 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
                 return;
             }
             bounceDetector.receive(inverter_packet, src);
-            std::string reqresp = ((inverter_packet.getCommandID() & 0xff) == 0x00 ? "request" : "response");
+            std::string reqresp = (((uint32_t)inverter_packet.getCommandID() & 0xff) == 0x00 ? "request" : "response");
             logger.print(LogLevel::LOG_INFO_1, "received inverter %s packet from %s susyid %u serial %lu time %lu\n", reqresp.c_str(), AddressConversion::toString(src).c_str(), susyid, serial, timer);
             std::string istr = inverter_packet.toString();
             logger.print(LogLevel::LOG_INFO_1, "%s\n", istr.c_str());
@@ -170,6 +170,44 @@ void InverterPacketReceiver::receive(SpeedwireHeader& speedwire_packet, struct s
             for (auto& sender : senders) {
                 sender->send(speedwire_packet, src);
             }
+#if 0
+            if (type == 0x01) {
+                // respond with a fake encryption response packet
+                uint8_t buffer[1024];
+                SpeedwireHeader packet(buffer, (unsigned long)sizeof(buffer));
+                packet.setDefaultHeader(0x00000001, 0x70, 0x6075);
+                SpeedwireData2Packet data2(packet);
+                SpeedwireEncryptionProtocol response(data2);
+
+                response.setPacketType(0x02);
+                response.setSrcSusyID(378);
+                response.setSrcSerialNumber(3009850131);
+                response.setDstSusyID(encryption_packet.getSrcSusyID());
+                response.setDstSerialNumber(encryption_packet.getSrcSerialNumber());
+
+                std::array<uint8_t, 16> src_seed = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                response.setDataUint8Array16(0, src_seed);
+                response.setDataUint8Array16(16, encryption_packet.getDataUint8Array16(0));
+
+                response.setDataUint8(32, 0x01);        // 0x00 ungesichert, 0x01 gesichert, 0x02 unbekannt
+                std::string str1 = "AXTYFV"; // "AXTYFV"; => Hohe Sicherheit mit RID; "2ATKKZYYYS6J6QHR" => Basissicherheit mit WPA-PSK
+                std::string str2 = "003783009850131";
+                std::string str3 = "2ATKKZYYYS6J6QHR";
+                response.setString16(33, str3);
+                response.setString16(49, str2);
+
+                std::array<uint8_t, 16> one_seed = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                std::array<uint8_t, 16> two_seed = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 };
+                response.setDataUint8Array16(65, one_seed);
+                response.setDataUint8Array16(81, two_seed);
+                std::string result = response.toString();
+                logger.print(LogLevel::LOG_INFO_1, "assembled: %s\n", result.c_str());
+                LocalHost::hexdump(buffer, 140);
+
+                SpeedwireSocket &socket = SpeedwireSocketFactory::getInstance(localHost)->getSendSocket(SpeedwireSocketFactory::SocketType::UNICAST, "192.168.178.20");
+                socket.sendto(packet.getPacketPointer(), packet.getPacketSize(), src);
+            }
+#endif
         }
     }
 }
