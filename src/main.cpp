@@ -90,7 +90,8 @@ int main(int argc, char **argv) {
 #if 0
     SpeedwireAuthentication authenticator(localhost, discoverer.getDevices());
     authenticator.logoffAnyFromAny();
-    authenticator.loginAnyToAny(true, "9999", 1000);
+    Credentials credential(UserName::USER, "9999");
+    authenticator.loginAnyToAny(credential, 1000);
 #endif
 
     //
